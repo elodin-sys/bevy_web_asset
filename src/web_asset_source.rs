@@ -71,6 +71,7 @@ async fn get<'a>(path: PathBuf) -> Result<Box<Reader<'a>>, AssetReaderError> {
             Ok(reader)
         }
         404 => Err(AssetReaderError::NotFound(path)),
+        403 => Err(AssetReaderError::NotFound(path)),
         status => Err(AssetReaderError::Io(std::io::Error::new(
             std::io::ErrorKind::Other,
             format!("Encountered unexpected HTTP status {status}"),
@@ -108,6 +109,7 @@ async fn get<'a>(path: PathBuf) -> Result<Box<Reader<'a>>, AssetReaderError> {
     match response.status() {
         StatusCode::OK => Ok(Box::new(response.into_body()) as _),
         StatusCode::NOT_FOUND => Err(AssetReaderError::NotFound(path)),
+        StatusCode::FORBIDDEN => Err(AssetReaderError::NotFound(path)),
         code => Err(AssetReaderError::Io(io::Error::new(
             io::ErrorKind::Other,
             format!("unexpected status code {code}"),
